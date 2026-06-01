@@ -1,0 +1,23 @@
+{
+  "name": "Almacen DA+CO - Identificador",
+  "short_name": "DA+CO Almacen",
+  "description": "Buscador segmentado de codigos e inventario para Punto Fijo",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme-color": "#b91c1c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "BASE/001.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "BASE/001.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
