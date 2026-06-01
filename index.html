@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almacen PF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        /* Estilos minimalistas Rojos y Blancos */
+        :root { --red-main: #e53935; --red-dark: #b71c1c; --white: #ffffff; --border: #dfe1e5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; flex-direction: column; min-height: 100vh; background-color: var(--white); }
+        main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        .brand-title { font-size: 4rem; color: var(--red-main); font-weight: 900; margin-bottom: 20px; }
+        
+        .status-msg { color: #888; font-style: italic; margin-bottom: 15px; font-size: 0.9rem; }
+        
+        .search-container { width: 100%; max-width: 600px; display: flex; gap: 10px; margin-bottom: 30px; }
+        .search-input { flex: 1; padding: 14px 20px; font-size: 1.1rem; border: 1px solid var(--border); border-radius: 30px; outline: none; }
+        .search-input:focus { border-color: var(--red-main); }
+        .btn-search { background-color: var(--red-main); color: var(--white); border: none; padding: 0 25px; border-radius: 30px; cursor: pointer; font-weight: bold; }
+        .btn-search:disabled, .search-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .results-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
+        .result-item { padding: 15px; border: 1px solid var(--border); border-radius: 8px; }
+        .result-title { font-size: 1.2rem; color: var(--red-main); font-weight: bold; }
+        .result-category { font-size: 0.8rem; color: #777; text-transform: uppercase; }
+        .result-desc { font-size: 0.95rem; color: #555; }
+    </style>
+</head>
+<body>
+
+    <main>
+        <h1 class="brand-title">Almacen DA+CO</h1>
+        
+        <p id="status" class="status-msg">Cargando base de datos</p>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Sku o Codigo" oninput="buscar()" disabled>
+            <button class="btn-search" id="searchBtn" disabled>Buscar</button>
+        </div>
+
+        <div class="results-container" id="resultsBox"></div>
+    </main>
+
+    <script>
+        let indiceProductos = [];
+
+        // 1. Cargar y leer el archivo CSV
+        function cargarCSV() {
+            // Usamos PapaParse para leer el archivo local
+            Papa.parse("datos.csv", {
+                download: true,       // Le decimos que descargue el archivo
+                header: true,         // Convierte la primera fila en los nombres de las variables
+                skipEmptyLines: true, // Ignora filas vacías al final del archivo
+                complete: function(resultados) {
+                    // Si es exitoso, guardamos los datos
+                    indiceProductos = resultados.data;
+                    
+                    // Habilitamos la barra de búsqueda
+                    document.getElementById('status').innerText = "✅ Conectado al archivo CSV. ¡Listo para buscar!";
+                    document.getElementById('searchInput').disabled = false;
+                    document.getElementById('searchBtn').disabled = false;
+                },
+                error: function(error) {
+                    document.getElementById('status').innerText = "❌ Error: Abre este archivo con Live Server (o un servidor local).";
+                    console.error("Error al leer CSV:", error);
+                }
+            });
+        }
+
+        // Iniciamos la carga
+        cargarCSV();
+
+        // 2. Función de búsqueda
+        function buscar() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resultsBox = document.getElementById('resultsBox');
+            resultsBox.innerHTML = ''; // Limpiar resultados anteriores
+
+            if (query === '') return; // Si está vacío, no hacer nada
+
+            // Filtramos la información del CSV
+            const resultadosFiltrados = indiceProductos.filter(producto => {
+                const titulo = (producto.Titulo || '').toLowerCase();
+                const categoria = (producto.Categoria || '').toLowerCase();
+                const desc = (producto.Desc || '').toLowerCase();
+
+                return titulo.includes(query) || categoria.includes(query) || desc.includes(query);
+            });
+
+            // 3. Mostrar los resultados
+            if (resultadosFiltrados.length === 0) {
+                resultsBox.innerHTML = '<p style="text-align:center; color:#777;">No se encontraron resultados.</p>';
+            } else {
+                resultadosFiltrados.forEach(producto => {
+                    resultsBox.innerHTML += `
+                        <div class="result-item">
+                            <div class="result-category">${producto.Categoria || ''}</div>
+                            <div class="result-title">${producto.Titulo || 'Sin título'}</div>
+                            <div class="result-desc">${producto.Desc || ''}</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
