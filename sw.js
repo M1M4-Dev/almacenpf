@@ -10,7 +10,7 @@ const ASSETS_TO_CACHE = [
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
 ];
 
-// Instalación y almacenamiento en caché inicial
+// Instalación inicial
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -19,7 +19,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// Limpieza de cachés antiguas
+// Purga de cachés obsoletas
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -34,12 +34,11 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Estrategia: Network First (Prioriza internet para tener el CSV fresco, si falla usa Caché)
+// Estrategia Network First: Prioriza datos nuevos si hay internet, si no, usa el caché offline
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(e.request)
       .then((response) => {
-        // Si la respuesta es válida, actualizamos la caché dinámicamente
         if (response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -49,7 +48,6 @@ self.addEventListener('fetch', (e) => {
         return response;
       })
       .catch(() => {
-        // Si no hay internet, sirve el recurso desde la caché local
         return caches.match(e.request);
       })
   );
