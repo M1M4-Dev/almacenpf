@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Almacen DA+CO - Identificador de Códigos</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#b91c1c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="BASE/001.png">
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +21,8 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .rotate-effect { animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
@@ -39,16 +48,23 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
         
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 transition-all hover:shadow-md">
-            <div class="relative max-w-2xl mx-auto text-center">
-                <h3 class="text-lg font-bold text-slate-900 mb-2">Busqueda</h3>               
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+            <div class="max-w-2xl mx-auto">
+                <h3 class="text-lg font-bold text-slate-900 mb-2 text-center">Busqueda de Inventario</h3>               
+                <div class="flex gap-3">
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" id="searchInput" disabled placeholder="Lectura de datos en progreso" 
+                            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner" />
                     </div>
-                    <input type="text" id="searchInput" disabled placeholder="Lectura de datos en progreso" 
-                        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner" />
+                    <button id="refreshBtn" title="Sincronizar Datos CSV" class="p-3.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 text-slate-600 hover:text-red-600 rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm">
+                        <svg id="refreshIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -59,7 +75,7 @@
                 <span id="rowCount" class="font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-lg text-xs border border-red-100">0</span>
             </div>
             <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Filtro en Tiempo Real
+                Filtro en Tiempo Real PWA
             </div>
         </div>
 
@@ -82,8 +98,27 @@
         let csvColumns = [];
         const csvPath = 'base/datos.csv';
 
+        const searchInput = document.getElementById('searchInput');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const refreshIcon = document.getElementById('refreshIcon');
+
         document.addEventListener('DOMContentLoaded', () => {
-            fetch(csvPath)
+            cargarBaseDatos();
+            
+            // Asignar evento al botón de refrescar
+            refreshBtn.addEventListener('click', () => {
+                refreshIcon.classList.add('rotate-effect');
+                cargarBaseDatos();
+                setTimeout(() => refreshIcon.classList.remove('rotate-effect'), 800);
+            });
+        });
+
+        // Función reutilizable de carga y sincronización
+        function cargarBaseDatos() {
+            searchInput.disabled = true;
+            mostrarCargadorInicial();
+
+            fetch(`${csvPath}?t=${new Date().getTime()}`) // Query string para romper cachés antiguas al refrescar
                 .then(response => {
                     if (!response.ok) throw new Error(`No se localizó el archivo en "${csvPath}".`);
                     return response.text();
@@ -96,7 +131,7 @@
                             if(results.data.length > 0) {
                                 databaseIndex = results.data;
                                 csvColumns = Object.keys(results.data[0]);
-                                actualizarEstadoUI(true, "Base de datos actualizada");
+                                actualizarEstadoUI(true, "Base de datos sincronizada");
                                 activarBuscador();
                             } else {
                                 actualizarEstadoUI(false, "El archivo CSV está vacío.");
@@ -110,17 +145,30 @@
                 .catch(error => {
                     actualizarEstadoUI(false, error.message);
                 });
-        });
+        }
+
+        function mostrarCargadorInicial() {
+            const infoArea = document.getElementById('infoArea');
+            const grid = document.getElementById('segmentsGrid');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            grid.classList.add('hidden');
+            statusMessage.classList.add('hidden');
+            infoArea.innerHTML = `
+                <div class="h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                <p class="text-sm font-medium text-slate-400">Sincronizando inventario...</p>`;
+            infoArea.classList.remove('hidden');
+        }
 
         function actualizarEstadoUI(exito, mensaje) {
             const badge = document.getElementById('statusBadge');
             const text = document.getElementById('statusText');
             
-            badge.classList.remove('bg-amber-400', 'animate-pulse');
+            badge.className = "h-2.5 w-2.5 rounded-full";
             if (exito) {
                 badge.classList.add('bg-emerald-400');
                 text.className = "text-xs font-bold text-emerald-100 tracking-wide";
-                mostrarPantallaEspera(); // Cambia la pantalla de carga por la invitación a buscar
+                mostrarPantallaEspera();
             } else {
                 badge.classList.add('bg-rose-500');
                 text.className = "text-xs font-bold text-rose-200 tracking-wide";
@@ -130,7 +178,7 @@
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     </div>
                     <p class="text-base font-bold text-slate-800">${mensaje}</p>
-                    <p class="text-xs text-slate-400 mt-1 text-center px-4">Verifica que corras la app web mediante un servidor local.</p>`;
+                    <p class="text-xs text-slate-400 mt-1 text-center px-4">Modo offline activo o error de archivo. Presiona refrescar para reintentar.</p>`;
             }
             text.textContent = mensaje;
         }
@@ -143,68 +191,60 @@
             };
         }
 
-        // Estado 1: Invitación inicial a buscar (Todo oculto por defecto)
         function mostrarPantallaEspera() {
             const infoArea = document.getElementById('infoArea');
-            const grid = document.getElementById('segmentsGrid');
-            const statusMessage = document.getElementById('statusMessage');
-
-            grid.classList.add('hidden');
-            statusMessage.classList.add('hidden'); // Oculta el contador superior
+            document.getElementById('segmentsGrid').classList.add('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
             
             infoArea.innerHTML = `
                 <div class="inline-flex p-3 bg-red-50 rounded-full text-red-500 mb-2">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <p class="text-base font-bold text-slate-700">Sistema Listo</p>
-                <p class="text-xs text-slate-400 max-w-xs text-center px-4">Escribe un S.K.U, modelo o palabra clave en el buscador superior para mostrar los datos de inventario.</p>`;
+                <p class="text-base font-bold text-slate-700">Listo para Buscar</p>
+                <p class="text-xs text-slate-400 max-w-xs text-center px-4">Ingresa código o modelo. Usa el botón lateral ↻ si actualizaste el archivo de datos.</p>`;
             infoArea.classList.remove('hidden');
         }
 
         function activarBuscador() {
-            const searchInput = document.getElementById('searchInput');
             searchInput.disabled = false;
-            searchInput.placeholder = "Busca palabras clave, modelo o S.K.U";
-            searchInput.focus();
+            if(document.activeElement !== searchInput && !searchInput.value) {
+                searchInput.placeholder = "Busca palabras clave, modelo o S.K.U";
+                searchInput.focus();
+            }
             
-            searchInput.addEventListener('input', debounce(function() {
+            // Remover listeners previos para evitar duplicados al refrescar
+            const clonInput = searchInput.cloneNode(true);
+            searchInput.parentNode.replaceChild(clonInput, searchInput);
+            
+            clonInput.addEventListener('input', debounce(function() {
                 const query = this.value.toLowerCase().trim();
-                
-                // Si borra el buscador, regresa a la pantalla de espera oculta datos
-                if (!query) {
-                    mostrarPantallaEspera();
-                    return;
-                }
+                if (!query) { mostrarPantallaEspera(); return; }
 
                 const resultadosFiltrados = databaseIndex.filter(registro => {
                     return csvColumns.some(columna => 
                         String(registro[columna]).toLowerCase().includes(query)
                     );
                 });
-
                 renderizarSegmentosOptimizados(resultadosFiltrados);
             }, 120));
         }
 
-        // Estado 2 y 3: Renderizado dinámico bajo demanda
         function renderizarSegmentosOptimizados(datos) {
             const infoArea = document.getElementById('infoArea');
             const grid = document.getElementById('segmentsGrid');
             const statusMessage = document.getElementById('statusMessage');
             const rowCount = document.getElementById('rowCount');
 
-            // Estado 2: Si no hay similitudes con lo que escribió
             if (datos.length === 0) {
                 grid.classList.add('hidden');
                 statusMessage.classList.add('hidden');
                 infoArea.innerHTML = `
                     <svg class="w-10 h-10 mx-auto text-slate-300 mb-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="font-medium text-slate-400">No se encontraron segmentos coincidentes.</span>`;
+                    <span class="font-medium text-slate-400">Sin coincidencias en este almacén.</span>`;
                 infoArea.classList.remove('hidden');
                 return;
             }
 
-            // Estado 3: Similitudes encontradas -> Mostrar bloques masivos
             infoArea.classList.add('hidden');
             statusMessage.classList.remove('hidden');
             rowCount.textContent = datos.length;
@@ -216,12 +256,20 @@
                         <span class="segmento-valor">${registro[columna] || '—'}</span>
                     </div>
                 `).join('');
-                
                 return `<div class="tarjeta-segmento">${filasHtml}</div>`;
             }).join('');
 
             grid.innerHTML = htmlChunks;
             grid.classList.remove('hidden');
+        }
+
+        // REGISTRO DEL SERVICE WORKER (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA: Service Worker activo de forma correcta', reg.scope))
+                    .catch(err => console.error('PWA: Fallo de registro', err));
+            });
         }
     </script>
 </body>
