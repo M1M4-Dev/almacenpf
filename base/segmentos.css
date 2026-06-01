@@ -1,6 +1,5 @@
 /* base/segmentos.css */
 
-/* Contenedor principal de los segmentos */
 .grid-segmentos {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -9,28 +8,28 @@
     padding: 0.25rem;
 }
 
-/* Tarjeta individual (Segmento de un artículo) */
+/* OPTIMIZACIÓN: content-visibility renderiza solo lo que el usuario ve en pantalla */
 .tarjeta-segmento {
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 1rem;
     padding: 1.25rem;
-    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05);
+    transition: transform 0.2s xl, box-shadow 0.2s xl;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    content-visibility: auto;
+    contain-intrinsic-size: 240px; 
 }
 
-/* Efecto focus/hover cuando el usuario pasa el mouse */
 .tarjeta-segmento:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 20px -3px rgba(220, 38, 38, 0.08), 0 4px 6px -2px rgba(220, 38, 38, 0.04);
+    box-shadow: 0 12px 20px -3px rgba(220, 38, 38, 0.08);
     border-color: #fca5a5;
 }
 
-/* Detalle visual: barra roja superior al hacer hover */
 .tarjeta-segmento::before {
     content: '';
     position: absolute;
@@ -40,14 +39,13 @@
     height: 4px;
     background: linear-gradient(to right, #b91c1c, #ef4444);
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.2s ease;
 }
 
 .tarjeta-segmento:hover::before {
     opacity: 1;
 }
 
-/* Filas internas del segmento */
 .segmento-fila {
     display: flex;
     justify-content: space-between;
@@ -60,7 +58,6 @@
     border-bottom: none;
 }
 
-/* Títulos de las categorías (Headers del CSV) */
 .segmento-etiqueta {
     font-size: 0.7rem;
     font-weight: 700;
@@ -69,7 +66,6 @@
     letter-spacing: 0.05em;
 }
 
-/* Valores del dato del CSV */
 .segmento-valor {
     font-size: 0.85rem;
     font-weight: 600;
@@ -80,7 +76,7 @@
     text-overflow: ellipsis;
 }
 
-/* Segmento Destacado: Estilo especial para la primera propiedad (SKU / Código Principal) */
+/* Destacado del SKU principal */
 .tarjeta-segmento .segmento-fila:first-child {
     background-color: #fff5f5;
     margin: -1.25rem -1.25rem 0.75rem -1.25rem;
