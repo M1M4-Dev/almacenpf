@@ -93,3 +93,20 @@
     color: #991b1b;
     font-weight: 700;
 }
+
+/* Añade esto al final de tu base/segmentos.css actual */
+
+.grid-segmentos {
+    animation: fadeInSuave 0.2s ease-out forwards;
+}
+
+@keyframes fadeInSuave {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
