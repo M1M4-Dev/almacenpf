@@ -93,20 +93,17 @@
         &copy; 2026 &middot; Eduardo Martinez "3DMM_58"
     </footer>
 
-    <!-- Lógica JS Avanzada Corregida -->
     <script>
         let databaseIndex = [];
         let csvColumns = [];
         const csvPath = 'base/datos.csv';
 
-        // Mantenemos globales solo los elementos que no se destruyen
         const refreshBtn = document.getElementById('refreshBtn');
         const refreshIcon = document.getElementById('refreshIcon');
 
         document.addEventListener('DOMContentLoaded', () => {
             cargarBaseDatos();
             
-            // Asignar evento al botón de refrescar
             refreshBtn.addEventListener('click', () => {
                 refreshIcon.classList.add('rotate-effect');
                 cargarBaseDatos();
@@ -114,15 +111,14 @@
             });
         });
 
-        // Función de carga y sincronización
         function cargarBaseDatos() {
-            // Buscamos el input actual en el DOM para poder desactivarlo
+            // Corrección: Captura el input actual del DOM de forma dinámica
             const currentInput = document.getElementById('searchInput');
             if (currentInput) currentInput.disabled = true;
             
             mostrarCargadorInicial();
 
-            fetch(`${csvPath}?t=${new Date().getTime()}`) // Rompe el caché del CSV
+            fetch(`${csvPath}?t=${new Date().getTime()}`)
                 .then(response => {
                     if (!response.ok) throw new Error(`No se localizó el archivo en "${csvPath}".`);
                     return response.text();
@@ -153,14 +149,13 @@
 
         function mostrarCargadorInicial() {
             const infoArea = document.getElementById('infoArea');
-            const grid = document.getElementById('segmentsGrid');
-            const statusMessage = document.getElementById('statusMessage');
+            document.getElementById('segmentsGrid').classList.add('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
             
-            grid.classList.add('hidden');
-            statusMessage.classList.add('hidden');
             infoArea.innerHTML = `
                 <div class="h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                <p class="text-sm font-medium text-slate-400">Sincronizando inventario...</p>`;
+                <p class="text-sm font-medium text-slate-400">Sincronizando inventario...</p>
+            `;
             infoArea.classList.remove('hidden');
         }
 
@@ -210,21 +205,23 @@
         }
 
         function activarBuscador() {
-            // Capturamos el input que está vivo en el árbol HTML actualmente
+            // Corrección: Buscamos el elemento vivo real actualmente en la pantalla
             const inputVivo = document.getElementById('searchInput');
             if (!inputVivo) return;
 
             inputVivo.disabled = false;
+            
+            // Si el usuario no tiene el foco puesto o el buscador está limpio, reestablecemos placeholders
             if(document.activeElement !== inputVivo && !inputVivo.value) {
                 inputVivo.placeholder = "Busca palabras clave, modelo o S.K.U";
                 inputVivo.focus();
             }
             
-            // Clonamos el elemento real y actual para limpiar listeners antiguos sin perder el padre
+            // Clonación limpia basada en el nodo actual para purgar los listeners viejos
             const clonInput = inputVivo.cloneNode(true);
             inputVivo.parentNode.replaceChild(clonInput, inputVivo);
             
-            // El listener se le aplica al nuevo clon que ahora está en el DOM
+            // Escuchamos el evento sobre el clon recién insertado
             clonInput.addEventListener('input', debounce(function() {
                 const query = this.value.toLowerCase().trim();
                 if (!query) { mostrarPantallaEspera(); return; }
@@ -272,7 +269,7 @@
             grid.classList.remove('hidden');
         }
 
-        // REGISTRO DEL SERVICE WORKER (PWA)
+        // Registro del Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
