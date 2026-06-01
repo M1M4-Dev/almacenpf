@@ -93,12 +93,13 @@
         &copy; 2026 &middot; Eduardo Martinez "3DMM_58"
     </footer>
 
+    <!-- Lógica JS Avanzada Corregida -->
     <script>
         let databaseIndex = [];
         let csvColumns = [];
         const csvPath = 'base/datos.csv';
 
-        const searchInput = document.getElementById('searchInput');
+        // Mantenemos globales solo los elementos que no se destruyen
         const refreshBtn = document.getElementById('refreshBtn');
         const refreshIcon = document.getElementById('refreshIcon');
 
@@ -113,12 +114,15 @@
             });
         });
 
-        // Función reutilizable de carga y sincronización
+        // Función de carga y sincronización
         function cargarBaseDatos() {
-            searchInput.disabled = true;
+            // Buscamos el input actual en el DOM para poder desactivarlo
+            const currentInput = document.getElementById('searchInput');
+            if (currentInput) currentInput.disabled = true;
+            
             mostrarCargadorInicial();
 
-            fetch(`${csvPath}?t=${new Date().getTime()}`) // Query string para romper cachés antiguas al refrescar
+            fetch(`${csvPath}?t=${new Date().getTime()}`) // Rompe el caché del CSV
                 .then(response => {
                     if (!response.ok) throw new Error(`No se localizó el archivo en "${csvPath}".`);
                     return response.text();
@@ -206,16 +210,21 @@
         }
 
         function activarBuscador() {
-            searchInput.disabled = false;
-            if(document.activeElement !== searchInput && !searchInput.value) {
-                searchInput.placeholder = "Busca palabras clave, modelo o S.K.U";
-                searchInput.focus();
+            // Capturamos el input que está vivo en el árbol HTML actualmente
+            const inputVivo = document.getElementById('searchInput');
+            if (!inputVivo) return;
+
+            inputVivo.disabled = false;
+            if(document.activeElement !== inputVivo && !inputVivo.value) {
+                inputVivo.placeholder = "Busca palabras clave, modelo o S.K.U";
+                inputVivo.focus();
             }
             
-            // Remover listeners previos para evitar duplicados al refrescar
-            const clonInput = searchInput.cloneNode(true);
-            searchInput.parentNode.replaceChild(clonInput, searchInput);
+            // Clonamos el elemento real y actual para limpiar listeners antiguos sin perder el padre
+            const clonInput = inputVivo.cloneNode(true);
+            inputVivo.parentNode.replaceChild(clonInput, inputVivo);
             
+            // El listener se le aplica al nuevo clon que ahora está en el DOM
             clonInput.addEventListener('input', debounce(function() {
                 const query = this.value.toLowerCase().trim();
                 if (!query) { mostrarPantallaEspera(); return; }
@@ -267,7 +276,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA: Service Worker activo de forma correcta', reg.scope))
+                    .then(reg => console.log('PWA: Service Worker activo', reg.scope))
                     .catch(err => console.error('PWA: Fallo de registro', err));
             });
         }
