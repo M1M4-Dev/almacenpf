@@ -1,0 +1,99 @@
+/* base/segmentos.css */
+
+/* Contenedor principal de los segmentos */
+.grid-segmentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    padding: 0.25rem;
+}
+
+/* Tarjeta individual (Segmento de un artículo) */
+.tarjeta-segmento {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efecto focus/hover cuando el usuario pasa el mouse */
+.tarjeta-segmento:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -3px rgba(220, 38, 38, 0.08), 0 4px 6px -2px rgba(220, 38, 38, 0.04);
+    border-color: #fca5a5;
+}
+
+/* Detalle visual: barra roja superior al hacer hover */
+.tarjeta-segmento::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, #b91c1c, #ef4444);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.tarjeta-segmento:hover::before {
+    opacity: 1;
+}
+
+/* Filas internas del segmento */
+.segmento-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0;
+    border-bottom: 1px dashed #f1f5f9;
+}
+
+.segmento-fila:last-child {
+    border-bottom: none;
+}
+
+/* Títulos de las categorías (Headers del CSV) */
+.segmento-etiqueta {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Valores del dato del CSV */
+.segmento-valor {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0f172a;
+    text-align: right;
+    max-width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Segmento Destacado: Estilo especial para la primera propiedad (SKU / Código Principal) */
+.tarjeta-segmento .segmento-fila:first-child {
+    background-color: #fff5f5;
+    margin: -1.25rem -1.25rem 0.75rem -1.25rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #fee2e2;
+}
+
+.tarjeta-segmento .segmento-fila:first-child .segmento-etiqueta {
+    color: #dc2626;
+}
+
+.tarjeta-segmento .segmento-fila:first-child .segmento-valor {
+    font-size: 1rem;
+    color: #991b1b;
+    font-weight: 700;
+}
