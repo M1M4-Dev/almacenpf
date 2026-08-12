@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almacen DA+CO - Identificador de Códigos</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#b91c1c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="base/001.png">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="base/segmentos.css">
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .rotate-effect { animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- HEADER -->
+    <header class="bg-gradient-to-r from-red-700 to-red-600 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white p-1.5 rounded-xl shadow-md flex items-center justify-center min-w-[70px] h-14">
+                    <img src="BASE/001.png" alt="Logotipo DA+CO" class="max-h-11 w-auto object-contain" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=\'text-red-600 font-extrabold text-sm px-2\'>DA+CO</span>';">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Almacen Punto Fijo</h1>
+                    <p class="text-xs text-red-100/80 font-medium">Identificador y Gestor de Códigos</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="exportCsvBtn" aria-label="Exportar base de datos a CSV" title="Guardar cambios a CSV" class="hidden bg-red-800/80 hover:bg-red-900 border border-red-400/40 px-3 py-2 rounded-xl text-xs font-semibold text-white tracking-wide transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Exportar CSV
+                </button>
+                <div class="bg-red-800/40 backdrop-blur-sm border border-red-500/30 px-4 py-2 rounded-xl flex items-center space-x-2.5">
+                    <span id="statusBadge" class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="statusText" class="text-xs font-semibold text-red-100 tracking-wide">Cargando recurso...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
+        
+        <!-- BUSCADOR Y BOTONES -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 transition-all hover:shadow-md">
+            <div class="max-w-3xl mx-auto flex flex-col gap-3">
+                <h3 class="text-lg font-bold text-slate-900 text-center">Búsqueda y Control de Inventario</h3> 
+                
+                <div class="flex gap-2 sm:gap-3">
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" id="searchInput" disabled placeholder="Lectura de datos en progreso" 
+                            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner" />
+                    </div>
+
+                    <button id="addRecordBtn" disabled aria-label="Agregar nuevo registro" title="Nuevo Registro" class="px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:cursor-not-allowed text-white rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm font-semibold text-sm">
+                        <svg class="h-5 w-5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span class="hidden sm:inline">Nuevo</span>
+                    </button>
+
+                    <button id="refreshBtn" aria-label="Sincronizar Datos CSV" title="Sincronizar Datos CSV" class="p-3.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 text-slate-600 hover:text-red-600 rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm">
+                        <svg id="refreshIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA DE ESTADO DE COINCIDENCIAS -->
+        <div id="statusMessage" class="hidden flex items-center justify-between bg-white px-5 py-3 rounded-xl border border-slate-200/60 shadow-sm">
+            <div class="flex items-center space-x-2 text-sm font-medium text-slate-600">
+                <span>Coincidencias encontradas:</span>
+                <span id="rowCount" class="font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-lg text-xs border border-red-100">0</span>
+            </div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Filtro en Tiempo Real PWA
+            </div>
+        </div>
+
+        <!-- CONTENEDOR DE TARJETAS / DATOS -->
+        <div id="dataContainer" class="w-full flex-grow flex flex-col justify-center">
+            <div id="infoArea" class="flex flex-col items-center justify-center space-y-3 py-20 bg-white rounded-2xl border border-slate-200">
+                <div class="h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-sm font-medium text-slate-400">Estableciendo conexión interna con base/datos.csv...</p>
+            </div>
+            
+            <div id="segmentsGrid" class="grid-segmentos hidden"></div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4.5 text-center text-xs font-semibold tracking-wide text-slate-400 uppercase">
+        &copy; 2026 &middot; Eduardo Martinez "3DMM_58"
+    </footer>
+
+    <!-- MODAL DE FORMULARIO (NUEVO / EDITAR REGISTRO) -->
+    <div id="recordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 id="modalTitle" class="font-bold text-base">Registrar Nuevo Item</h3>
+                <button id="closeModalBtn" class="text-slate-400 hover:text-white transition-colors text-xl font-bold">&times;</button>
+            </div>
+            <form id="recordForm" class="p-6 overflow-y-auto space-y-4 flex-grow">
+                <input type="hidden" id="editIndex" value="-1">
+                <div id="dynamicFormFields" class="space-y-3">
+                    <!-- Campos autogenerados dinámicamente según el CSV -->
+                </div>
+            </form>
+            <div class="bg-slate-50 border-t border-slate-200 px-6 py-3.5 flex justify-end gap-3">
+                <button type="button" id="cancelFormBtn" class="px-4 py-2 border border-slate-300 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-100 transition-all">Cancelar</button>
+                <button type="submit" form="recordForm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-xs transition-all shadow-sm">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT PRINCIPAL REESTRUCTURADO -->
+    <script>
+        let databaseIndex = [];
+        let csvColumns = [];
+        const csvPath = 'base/datos.csv';
+        const STORAGE_KEY = 'almacen_pf_custom_db';
+
+        // Referencias del DOM
+        const searchInput = document.getElementById('searchInput');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const refreshIcon = document.getElementById('refreshIcon');
+        const addRecordBtn = document.getElementById('addRecordBtn');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+
+        // Referencias del Modal
+        const recordModal = document.getElementById('recordModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelFormBtn = document.getElementById('cancelFormBtn');
+        const recordForm = document.getElementById('recordForm');
+        const dynamicFormFields = document.getElementById('dynamicFormFields');
+        const modalTitle = document.getElementById('modalTitle');
+        const editIndexInput = document.getElementById('editIndex');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarEventos();
+            cargarBaseDatos();
+        });
+
+        function inicializarEventos() {
+            // Evento único para el buscador optimizado con Debounce
+            searchInput.addEventListener('input', debounce(function() {
+                const query = this.value.toLowerCase().trim();
+                if (!query) { mostrarPantallaEspera(); return; }
+
+                const resultadosFiltrados = databaseIndex.map((registro, originalIndex) => ({ registro, originalIndex }))
+                    .filter(({ registro }) => {
+                        return csvColumns.some(columna => 
+                            String(registro[columna] || '').toLowerCase().includes(query)
+                        );
+                    });
+
+                renderizarSegmentosOptimizados(resultadosFiltrados);
+            }, 120));
+
+            // Sincronización
+            refreshBtn.addEventListener('click', () => {
+                refreshIcon.classList.add('rotate-effect');
+                cargarBaseDatos();
+                setTimeout(() => refreshIcon.classList.remove('rotate-effect'), 800);
+            });
+
+            // Modal y Formulario
+            addRecordBtn.addEventListener('click', () => abrirModalParaCrear());
+            closeModalBtn.addEventListener('click', cerrarModal);
+            cancelFormBtn.addEventListener('click', cerrarModal);
+            recordForm.addEventListener('submit', guardarRegistro);
+
+            // Exportación
+            exportCsvBtn.addEventListener('click', exportarBaseDatosCSV);
+        }
+
+        function cargarBaseDatos() {
+            searchInput.disabled = true;
+            addRecordBtn.disabled = true;
+            mostrarCargadorInicial();
+
+            fetch(`${csvPath}?t=${new Date().getTime()}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`No se localizó el archivo en "${csvPath}".`);
+                    return response.text();
+                })
+                .then(csvText => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            if(results.data.length > 0) {
+                                csvColumns = Object.keys(results.data[0]);
+                                
+                                // Fusionar datos remotos con modificaciones locales persistidas
+                                const localData = localStorage.getItem(STORAGE_KEY);
+                                if (localData) {
+                                    try {
+                                        databaseIndex = JSON.parse(localData);
+                                    } catch (e) {
+                                        databaseIndex = results.data;
+                                    }
+                                } else {
+                                    databaseIndex = results.data;
+                                }
+
+                                actualizarEstadoUI(true, "Base de datos sincronizada");
+                                habilitarInteracciones();
+                            } else {
+                                actualizarEstadoUI(false, "El archivo CSV está vacío.");
+                            }
+                        },
+                        error: function(error) {
+                            actualizarEstadoUI(false, "Fallo al procesar CSV: " + error.message);
+                        }
+                    });
+                })
+                .catch(error => {
+                    actualizarEstadoUI(false, error.message);
+                });
+        }
+
+        function habilitarInteracciones() {
+            searchInput.disabled = false;
+            addRecordBtn.disabled = false;
+            exportCsvBtn.classList.remove('hidden');
+
+            if (document.activeElement !== searchInput && !searchInput.value) {
+                searchInput.placeholder = "Busca palabras clave, modelo o S.K.U";
+                searchInput.focus();
+            }
+        }
+
+        function mostrarCargadorInicial() {
+            const infoArea = document.getElementById('infoArea');
+            document.getElementById('segmentsGrid').classList.add('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
+            
+            infoArea.innerHTML = `
+                <div class="h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                <p class="text-sm font-medium text-slate-400">Sincronizando inventario...</p>
+            `;
+            infoArea.classList.remove('hidden');
+        }
+
+        function actualizarEstadoUI(exito, mensaje) {
+            const badge = document.getElementById('statusBadge');
+            const text = document.getElementById('statusText');
+            
+            badge.className = "h-2.5 w-2.5 rounded-full";
+            if (exito) {
+                badge.classList.add('bg-emerald-400');
+                text.className = "text-xs font-bold text-emerald-100 tracking-wide";
+                mostrarPantallaEspera();
+            } else {
+                badge.classList.add('bg-rose-500');
+                text.className = "text-xs font-bold text-rose-200 tracking-wide";
+                
+                document.getElementById('infoArea').innerHTML = `
+                    <div class="inline-flex p-3 bg-rose-50 rounded-full text-rose-500 mb-3">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <p class="text-base font-bold text-slate-800">${mensaje}</p>
+                    <p class="text-xs text-slate-400 mt-1 text-center px-4">Modo offline activo o error de archivo. Presiona refrescar para reintentar.</p>`;
+            }
+            text.textContent = mensaje;
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        function mostrarPantallaEspera() {
+            const infoArea = document.getElementById('infoArea');
+            document.getElementById('segmentsGrid').classList.add('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
+            
+            infoArea.innerHTML = `
+                <div class="inline-flex p-3 bg-red-50 rounded-full text-red-500 mb-2">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <p class="text-base font-bold text-slate-700">Listo para Buscar</p>
+                <p class="text-xs text-slate-400 max-w-xs text-center px-4">Ingresa código o modelo. Usa el botón '+' para agregar o '↻' para actualizar la base.</p>`;
+            infoArea.classList.remove('hidden');
+        }
+
+        function renderizarSegmentosOptimizados(datosEncontrados) {
+            const infoArea = document.getElementById('infoArea');
+            const grid = document.getElementById('segmentsGrid');
+            const statusMessage = document.getElementById('statusMessage');
+            const rowCount = document.getElementById('rowCount');
+
+            if (datosEncontrados.length === 0) {
+                grid.classList.add('hidden');
+                statusMessage.classList.add('hidden');
+                infoArea.innerHTML = `
+                    <svg class="w-10 h-10 mx-auto text-slate-300 mb-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="font-medium text-slate-400">Sin coincidencias en este almacén.</span>`;
+                infoArea.classList.remove('hidden');
+                return;
+            }
+
+            infoArea.classList.add('hidden');
+            statusMessage.classList.remove('hidden');
+            rowCount.textContent = datosEncontrados.length;
+
+            const htmlChunks = datosEncontrados.map(({ registro, originalIndex }) => {
+                const filasHtml = csvColumns.map(columna => `
+                    <div class="segmento-fila">
+                        <span class="segmento-etiqueta">${columna}</span>
+                        <span class="segmento-valor">${registro[columna] || '—'}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="tarjeta-segmento relative group">
+                        ${filasHtml}
+                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-end">
+                            <button onclick="abrirModalParaEditar(${originalIndex})" class="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                Editar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            grid.innerHTML = htmlChunks;
+            grid.classList.remove('hidden');
+        }
+
+        /* --- LÓGICA DE EDICIÓN Y REGISTRO --- */
+
+        function construirCamposFormulario(datosRegistro = {}) {
+            dynamicFormFields.innerHTML = csvColumns.map(col => `
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">${col}</label>
+                    <input type="text" name="${col}" value="${datosRegistro[col] || ''}" 
+                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:bg-white focus:border-red-500 focus:outline-none transition-all">
+                </div>
+            `).join('');
+        }
+
+        function abrirModalParaCrear() {
+            modalTitle.textContent = "Registrar Nuevo Ítem";
+            editIndexInput.value = "-1";
+            construirCamposFormulario();
+            recordModal.classList.remove('hidden');
+        }
+
+        function abrirModalParaEditar(index) {
+            modalTitle.textContent = "Editar Ítem del Inventario";
+            editIndexInput.value = index;
+            construirCamposFormulario(databaseIndex[index]);
+            recordModal.classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            recordModal.classList.add('hidden');
+            recordForm.reset();
+        }
+
+        function guardarRegistro(e) {
+            e.preventDefault();
+            const formData = new FormData(recordForm);
+            const nuevoRegistro = {};
+
+            csvColumns.forEach(col => {
+                nuevoRegistro[col] = formData.get(col) || '';
+            });
+
+            const editIndex = parseInt(editIndexInput.value, 10);
+
+            if (editIndex >= 0) {
+                databaseIndex[editIndex] = nuevoRegistro;
+            } else {
+                databaseIndex.unshift(nuevoRegistro);
+            }
+
+            // Persistir cambios
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(databaseIndex));
+            cerrarModal();
+
+            // Refrescar vista si hay algo escrito en el buscador
+            if (searchInput.value.trim()) {
+                searchInput.dispatchEvent(new Event('input'));
+            } else {
+                mostrarPantallaEspera();
+            }
+        }
+
+        function exportarBaseDatosCSV() {
+            if (databaseIndex.length === 0) return;
+            
+            const csvOutput = Papa.unparse(databaseIndex);
+            const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'datos.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Registro del Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA: Service Worker activo', reg.scope))
+                    .catch(err => console.error('PWA: Fallo de registro', err));
+            });
+        }
+    </script>
+</body>
+</html>
