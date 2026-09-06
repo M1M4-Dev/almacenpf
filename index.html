@@ -10,12 +10,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Tailwind CSS & Librerías -->
+    <!-- Tailwind CSS & Librerías Ligeras -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="base/segmentos.css">
 
@@ -25,100 +25,116 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-red-100 selection:text-red-700">
+
     <!-- HEADER -->
     <header class="bg-gradient-to-r from-red-700 to-red-600 text-white shadow-lg sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-4">
-                <div class="bg-white p-2 rounded-xl shadow-md flex items-center justify-center min-w-[56px] h-12">
-                    <svg class="w-8 h-8 text-red-600" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white p-2 rounded-xl shadow-md flex items-center justify-center w-11 h-11">
+                        <svg class="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-extrabold tracking-tight leading-tight">Almacén Punto Fijo</h1>
+                        <p class="text-[11px] text-red-100/80 font-medium">Gestor Rápido de Inventario</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">Almacén Punto Fijo</h1>
-                    <p class="text-xs text-red-100/80 font-medium">Identificador y Gestor de Códigos</p>
+
+                <div class="sm:hidden flex items-center space-x-2">
+                    <span id="statusBadgeMobile" class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse"></span>
                 </div>
             </div>
             
-            <div class="flex items-center gap-3">
-                <button id="exportCsvBtn" aria-label="Exportar base de datos a CSV" title="Guardar cambios a CSV" class="hidden bg-red-800/80 hover:bg-red-900 border border-red-400/40 px-3 py-2 rounded-xl text-xs font-semibold text-white tracking-wide transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                <button id="exportCsvBtn" aria-label="Exportar base de datos a CSV" title="Guardar cambios a CSV" class="hidden bg-red-800/80 hover:bg-red-900 border border-red-400/40 px-3 py-1.5 rounded-xl text-xs font-semibold text-white tracking-wide transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
-                    Exportar CSV
+                    Exportar
                 </button>
-                <div class="bg-red-800/40 backdrop-blur-sm border border-red-500/30 px-4 py-2 rounded-xl flex items-center space-x-2.5">
-                    <span id="statusBadge" class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-                    <span id="statusText" class="text-xs font-semibold text-red-100 tracking-wide">Cargando recurso...</span>
+                <div class="hidden sm:flex bg-red-800/40 backdrop-blur-sm border border-red-500/30 px-3.5 py-1.5 rounded-xl items-center space-x-2">
+                    <span id="statusBadge" class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="statusText" class="text-xs font-semibold text-red-100 tracking-wide">Iniciando...</span>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
         
-        <!-- BUSCADOR Y BOTONES -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 transition-all hover:shadow-md">
+        <!-- PANEL DE BÚSQUEDA -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5">
             <div class="max-w-3xl mx-auto flex flex-col gap-3">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-slate-900">Búsqueda y Control de Inventario</h3>
-                    <!-- Indicador de última búsqueda -->
-                    <span id="lastSearchBadge" class="hidden text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg border border-slate-200"></span>
+                    <label for="searchInput" class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Buscador en Tiempo Real
+                    </label>
+                    <span class="hidden sm:inline-block text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">Presiona <kbd class="font-bold text-slate-600">/</kbd> para buscar</span>
                 </div>
                 
-                <div class="flex gap-2 sm:gap-3">
+                <div class="flex gap-2 sm:gap-2.5">
                     <div class="relative flex-grow">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-                        <input type="text" id="searchInput" disabled placeholder="Lectura de datos en progreso..." 
-                            class="w-full pl-12 pr-10 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner" />
+                        <input type="text" id="searchInput" disabled placeholder="Conectando almacén..." 
+                            class="w-full pl-11 pr-10 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all font-semibold text-slate-800 placeholder-slate-400 text-sm shadow-inner" />
                         
-                        <!-- Botón limpiar búsqueda (X) -->
-                        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors" title="Limpiar búsqueda">
+                        <!-- Botón Limpiar (X) -->
+                        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-red-500 transition-colors" title="Borrar búsqueda (Esc)">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
                     </div>
 
-                    <button id="addRecordBtn" disabled aria-label="Agregar nuevo registro" title="Nuevo Registro" class="px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:cursor-not-allowed text-white rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm font-semibold text-sm">
-                        <svg class="h-5 w-5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <button id="addRecordBtn" disabled aria-label="Agregar nuevo registro" title="Nuevo Registro" class="px-3.5 sm:px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:cursor-not-allowed text-white rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm font-bold text-xs sm:text-sm">
+                        <svg class="h-4 w-4 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
                         <span class="hidden sm:inline">Nuevo</span>
                     </button>
 
-                    <button id="refreshBtn" aria-label="Sincronizar Datos CSV" title="Recargar archivo CSV original" class="p-3.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 text-slate-600 hover:text-red-600 rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm">
-                        <svg id="refreshIcon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18" />
+                    <button id="refreshBtn" aria-label="Sincronizar Datos CSV" title="Recargar CSV original" class="p-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-red-600 rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-95 shadow-sm">
+                        <svg id="refreshIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18" />
                         </svg>
                     </button>
+                </div>
+
+                <!-- Chips de Búsquedas Recientes -->
+                <div id="recentSearchesContainer" class="hidden flex items-center gap-1.5 flex-wrap pt-1 text-xs">
+                    <span class="text-slate-400 font-bold text-[11px] uppercase mr-1">Recientes:</span>
+                    <div id="recentChips" class="flex flex-wrap gap-1.5"></div>
                 </div>
             </div>
         </div>
 
-        <!-- BARRA DE ESTADO DE COINCIDENCIAS -->
-        <div id="statusMessage" class="hidden flex items-center justify-between bg-white px-5 py-3 rounded-xl border border-slate-200/60 shadow-sm">
-            <div class="flex items-center space-x-2 text-sm font-medium text-slate-600">
-                <span>Coincidencias:</span>
-                <span id="rowCount" class="font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-lg text-xs border border-red-100">0</span>
-                <span id="renderLimitNote" class="text-xs text-amber-600 font-medium hidden"></span>
+        <!-- BARRA DE RESULTADOS -->
+        <div id="statusMessage" class="hidden flex items-center justify-between bg-white px-4 py-2.5 rounded-xl border border-slate-200/70 shadow-sm text-xs">
+            <div class="flex items-center space-x-2 font-semibold text-slate-600">
+                <span>Resultados:</span>
+                <span id="rowCount" class="font-extrabold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100">0</span>
+                <span id="renderLimitNote" class="text-amber-600 font-medium hidden"></span>
             </div>
-            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Tiempo Real PWA
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Inventario Local
             </div>
         </div>
 
-        <!-- CONTENEDOR DE TARJETAS / DATOS -->
+        <!-- CONTENEDOR PRINCIPAL / DATOS -->
         <div id="dataContainer" class="w-full flex-grow flex flex-col justify-center">
-            <div id="infoArea" class="flex flex-col items-center justify-center space-y-3 py-20 bg-white rounded-2xl border border-slate-200">
-                <div class="h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-sm font-medium text-slate-400">Estableciendo conexión con la base de datos...</p>
+            
+            <!-- Skeleton Loader / Estado de carga -->
+            <div id="infoArea" class="w-full">
+                <!-- Se inyecta dinámicamente -->
             </div>
             
             <div id="segmentsGrid" class="grid-segmentos hidden"></div>
@@ -126,47 +142,50 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs font-semibold tracking-wide text-slate-400 uppercase">
+    <footer class="bg-white border-t border-slate-200 py-3.5 text-center text-xs font-semibold tracking-wide text-slate-400 uppercase">
         &copy; 2026 &middot; Eduardo Martínez "3DMM_58"
     </footer>
 
-    <!-- MODAL DE FORMULARIO (NUEVO / EDITAR) -->
+    <!-- MODAL FORMULARIO -->
     <div id="recordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-base">Registrar Nuevo Ítem</h3>
+                <h3 id="modalTitle" class="font-bold text-sm tracking-wide">Registrar Ítem</h3>
                 <button id="closeModalBtn" class="text-slate-400 hover:text-white transition-colors text-xl font-bold">&times;</button>
             </div>
-            <form id="recordForm" class="p-6 overflow-y-auto space-y-4 flex-grow">
+            <form id="recordForm" class="p-6 overflow-y-auto space-y-3.5 flex-grow">
                 <input type="hidden" id="editIndex" value="-1">
                 <div id="dynamicFormFields" class="space-y-3"></div>
             </form>
-            <div class="bg-slate-50 border-t border-slate-200 px-6 py-3.5 flex justify-end gap-3">
+            <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex justify-end gap-2.5">
                 <button type="button" id="cancelFormBtn" class="px-4 py-2 border border-slate-300 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-100 transition-all">Cancelar</button>
-                <button type="submit" form="recordForm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-xs transition-all shadow-sm">Guardar Cambios</button>
+                <button type="submit" form="recordForm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm">Guardar</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT DE ALTO RENDIMIENTO -->
+    <!-- SCRIPT PRINCIPAL -->
     <script>
         let databaseIndex = [];
         let csvColumns = [];
         const csvPath = 'base/datos.csv';
         const STORAGE_KEY = 'almacen_pf_custom_db';
         const LAST_SEARCH_KEY = 'almacen_pf_last_query';
-        const MAX_RENDER_ITEMS = 60; // Evita lag de DOM al renderizar
+        const RECENT_SEARCHES_KEY = 'almacen_pf_recent_chips';
+        const MAX_RENDER_ITEMS = 60;
+        let activeQuery = '';
 
-        // Referencias DOM
+        // DOM Elements
         const searchInput = document.getElementById('searchInput');
         const clearSearchBtn = document.getElementById('clearSearchBtn');
-        const lastSearchBadge = document.getElementById('lastSearchBadge');
+        const recentSearchesContainer = document.getElementById('recentSearchesContainer');
+        const recentChips = document.getElementById('recentChips');
         const refreshBtn = document.getElementById('refreshBtn');
         const refreshIcon = document.getElementById('refreshIcon');
         const addRecordBtn = document.getElementById('addRecordBtn');
         const exportCsvBtn = document.getElementById('exportCsvBtn');
 
-        // Modal DOM
+        // Modal Elements
         const recordModal = document.getElementById('recordModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const cancelFormBtn = document.getElementById('cancelFormBtn');
@@ -176,47 +195,54 @@
         const editIndexInput = document.getElementById('editIndex');
 
         document.addEventListener('DOMContentLoaded', () => {
+            mostrarSkeletonLoader();
             inicializarEventos();
             cargarBaseDatos();
         });
 
         function inicializarEventos() {
-            // Búsqueda ultrarrápida con debounce ligero (80ms)
+            // Buscador con debounce ultra-ligero (70ms)
             searchInput.addEventListener('input', debounce(function() {
-                const query = this.value.toLowerCase().trim();
-                
-                // Mostrar/Ocultar botón X
+                const query = this.value.trim();
+                activeQuery = query;
                 clearSearchBtn.classList.toggle('hidden', query.length === 0);
 
                 if (!query) {
                     localStorage.removeItem(LAST_SEARCH_KEY);
-                    actualizarBadgeUltimaBusqueda('');
                     mostrarPantallaEspera();
                     return;
                 }
 
-                // Guardar la última búsqueda
                 localStorage.setItem(LAST_SEARCH_KEY, query);
-                actualizarBadgeUltimaBusqueda(query);
+                guardarBusquedaReciente(query);
+                ejecutarBusqueda(query.toLowerCase());
+            }, 70));
 
-                ejecutarBusqueda(query);
-            }, 80));
-
-            // Botón Limpiar Búsqueda
+            // Botón Limpiar (X)
             clearSearchBtn.addEventListener('click', () => {
                 searchInput.value = '';
+                activeQuery = '';
                 clearSearchBtn.classList.add('hidden');
                 localStorage.removeItem(LAST_SEARCH_KEY);
-                actualizarBadgeUltimaBusqueda('');
                 mostrarPantallaEspera();
                 searchInput.focus();
             });
 
-            // Sincronización / Refrescar
+            // Atajos de teclado: "/" para buscar y "Escape" para limpiar
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && document.activeElement !== searchInput) {
+                    e.preventDefault();
+                    searchInput.focus();
+                } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+                    clearSearchBtn.click();
+                }
+            });
+
+            // Sincronización
             refreshBtn.addEventListener('click', () => {
                 refreshIcon.classList.add('rotate-effect');
                 if (localStorage.getItem(STORAGE_KEY)) {
-                    if (confirm("¿Deseas descartar cambios locales y recargar desde el CSV original?")) {
+                    if (confirm("¿Descartar cambios locales y recargar archivo original datos.csv?")) {
                         localStorage.removeItem(STORAGE_KEY);
                     }
                 }
@@ -230,19 +256,17 @@
             cancelFormBtn.addEventListener('click', cerrarModal);
             recordForm.addEventListener('submit', guardarRegistro);
 
-            // Exportación
+            // Exportar
             exportCsvBtn.addEventListener('click', exportarBaseDatosCSV);
         }
 
-        // Pre-indexa cada fila en una sola cadena de texto para búsqueda instantánea O(1)
+        // Precalcula el string de búsqueda O(1)
         function indexarBaseDatos(data) {
             for (let i = 0; i < data.length; i++) {
                 const row = data[i];
                 let searchConcat = '';
                 for (let k in row) {
-                    if (k !== '_searchIndex') {
-                        searchConcat += (row[k] || '') + ' ';
-                    }
+                    if (k !== '_searchIndex') searchConcat += (row[k] || '') + ' ';
                 }
                 row._searchIndex = searchConcat.toLowerCase();
             }
@@ -252,18 +276,18 @@
         function cargarBaseDatos() {
             searchInput.disabled = true;
             addRecordBtn.disabled = true;
-            mostrarCargadorInicial();
+            mostrarSkeletonLoader();
 
             fetch(`${csvPath}?t=${Date.now()}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`No se encontró el archivo "${csvPath}".`);
-                    return response.text();
+                .then(res => {
+                    if (!res.ok) throw new Error(`Archivo no encontrado: "${csvPath}"`);
+                    return res.text();
                 })
                 .then(csvText => {
                     Papa.parse(csvText, {
                         header: true,
                         skipEmptyLines: true,
-                        complete: function(results) {
+                        complete: (results) => {
                             if (results.data && results.data.length > 0) {
                                 csvColumns = Object.keys(results.data[0]).filter(k => k !== '_searchIndex');
                                 
@@ -278,80 +302,109 @@
                                     databaseIndex = indexarBaseDatos(results.data);
                                 }
 
-                                actualizarEstadoUI(true, "Base de datos sincronizada");
+                                actualizarEstadoUI(true, "Base lista");
                                 habilitarInteracciones();
+                                renderizarChipsRecientes();
                                 restaurarUltimaBusqueda();
                             } else {
-                                actualizarEstadoUI(false, "El archivo CSV está vacío.");
+                                actualizarEstadoUI(false, "Archivo CSV vacío");
                             }
                         },
-                        error: function(error) {
-                            actualizarEstadoUI(false, "Error al procesar CSV: " + error.message);
-                        }
+                        error: (err) => actualizarEstadoUI(false, "Error CSV: " + err.message)
                     });
                 })
-                .catch(error => {
+                .catch(err => {
                     const localData = localStorage.getItem(STORAGE_KEY);
                     if (localData) {
                         try {
                             databaseIndex = indexarBaseDatos(JSON.parse(localData));
                             csvColumns = Object.keys(databaseIndex[0] || {}).filter(k => k !== '_searchIndex');
-                            actualizarEstadoUI(true, "Modo Offline (Copia Local)");
+                            actualizarEstadoUI(true, "Modo Offline (Local)");
                             habilitarInteracciones();
+                            renderizarChipsRecientes();
                             restaurarUltimaBusqueda();
                             return;
                         } catch (e) {}
                     }
-                    actualizarEstadoUI(false, error.message);
+                    actualizarEstadoUI(false, err.message);
                 });
         }
 
         function restaurarUltimaBusqueda() {
-            const ultimaBusqueda = localStorage.getItem(LAST_SEARCH_KEY);
-            if (ultimaBusqueda && ultimaBusqueda.trim()) {
-                searchInput.value = ultimaBusqueda;
+            const ultima = localStorage.getItem(LAST_SEARCH_KEY);
+            if (ultima && ultima.trim()) {
+                searchInput.value = ultima;
+                activeQuery = ultima;
                 clearSearchBtn.classList.remove('hidden');
-                actualizarBadgeUltimaBusqueda(ultimaBusqueda);
-                ejecutarBusqueda(ultimaBusqueda.toLowerCase().trim());
+                ejecutarBusqueda(ultima.toLowerCase().trim());
             }
         }
 
-        function actualizarBadgeUltimaBusqueda(term) {
-            if (term) {
-                lastSearchBadge.textContent = `Última: "${term}"`;
-                lastSearchBadge.classList.remove('hidden');
-            } else {
-                lastSearchBadge.classList.add('hidden');
-            }
+        function guardarBusquedaReciente(term) {
+            if (!term || term.length < 2) return;
+            let recientes = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]');
+            recientes = [term, ...recientes.filter(item => item.toLowerCase() !== term.toLowerCase())].slice(0, 4);
+            localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recientes));
+            renderizarChipsRecientes();
         }
+
+        function renderizarChipsRecientes() {
+            const recientes = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]');
+            if (recientes.length === 0) {
+                recentSearchesContainer.classList.add('hidden');
+                return;
+            }
+            recentChips.innerHTML = recientes.map(tag => `
+                <button onclick="seleccionarChip('${tag}')" class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer">
+                    ${tag}
+                </button>
+            `).join('');
+            recentSearchesContainer.classList.remove('hidden');
+        }
+
+        window.seleccionarChip = function(tag) {
+            searchInput.value = tag;
+            activeQuery = tag;
+            clearSearchBtn.classList.remove('hidden');
+            localStorage.setItem(LAST_SEARCH_KEY, tag);
+            ejecutarBusqueda(tag.toLowerCase());
+            searchInput.focus();
+        };
 
         function ejecutarBusqueda(query) {
             const tokens = query.split(' ').filter(t => t.length > 0);
             const resultados = [];
 
-            // Búsqueda ultrarrápida usando el índice precalculado
             for (let i = 0; i < databaseIndex.length; i++) {
                 const item = databaseIndex[i];
                 const indexStr = item._searchIndex;
-                
-                // Debe coincidir con todas las palabras ingresadas
-                let coincide = true;
+                let match = true;
                 for (let j = 0; j < tokens.length; j++) {
                     if (!indexStr.includes(tokens[j])) {
-                        coincide = false;
+                        match = false;
                         break;
                     }
                 }
-
-                if (coincide) {
-                    resultados.push({ registro: item, originalIndex: i });
-                }
+                if (match) resultados.push({ registro: item, originalIndex: i });
             }
 
-            renderizarSegmentosOptimizados(resultados);
+            renderizarSegmentosOptimizados(resultados, tokens);
         }
 
-        function renderizarSegmentosOptimizados(datosEncontrados) {
+        // Resaltado dinámico ligero con <mark>
+        function resaltar(texto, tokens) {
+            if (!texto || !tokens || tokens.length === 0) return texto || '—';
+            let res = String(texto);
+            tokens.forEach(tok => {
+                if (tok.length > 0) {
+                    const regex = new RegExp(`(${tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    res = res.replace(regex, '<mark class="bg-amber-200 text-amber-950 font-bold px-0.5 rounded">$1</mark>');
+                }
+            });
+            return res;
+        }
+
+        function renderizarSegmentosOptimizados(datosEncontrados, tokens) {
             const infoArea = document.getElementById('infoArea');
             const grid = document.getElementById('segmentsGrid');
             const statusMessage = document.getElementById('statusMessage');
@@ -362,10 +415,13 @@
                 grid.classList.add('hidden');
                 statusMessage.classList.add('hidden');
                 infoArea.innerHTML = `
-                    <svg class="w-10 h-10 mx-auto text-slate-300 mb-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span class="font-medium text-slate-400">Sin coincidencias para esta búsqueda.</span>`;
+                    <div class="py-16 text-center bg-white rounded-2xl border border-slate-200">
+                        <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="font-bold text-slate-700 text-sm">Sin coincidencias</p>
+                        <p class="text-xs text-slate-400 mt-0.5">No se encontraron artículos con ese criterio.</p>
+                    </div>`;
                 infoArea.classList.remove('hidden');
                 return;
             }
@@ -374,41 +430,73 @@
             statusMessage.classList.remove('hidden');
             rowCount.textContent = datosEncontrados.length;
 
-            // Limitar las tarjetas que se insertan en el DOM para mantener la fluidez
             const itemsToRender = datosEncontrados.slice(0, MAX_RENDER_ITEMS);
 
             if (datosEncontrados.length > MAX_RENDER_ITEMS) {
-                renderLimitNote.textContent = `(Mostrando primeros ${MAX_RENDER_ITEMS})`;
+                renderLimitNote.textContent = `(primeros ${MAX_RENDER_ITEMS})`;
                 renderLimitNote.classList.remove('hidden');
             } else {
                 renderLimitNote.classList.add('hidden');
             }
 
+            const colPrincipal = csvColumns[0] || '';
+            const colSecundaria = csvColumns[1] || '';
+            const restoColumnas = csvColumns.slice(2);
+
             let html = '';
             for (let i = 0; i < itemsToRender.length; i++) {
                 const { registro, originalIndex } = itemsToRender[i];
-                let filas = '';
-                
-                for (let j = 0; j < csvColumns.length; j++) {
-                    const col = csvColumns[j];
-                    filas += `
-                        <div class="segmento-fila">
-                            <span class="segmento-etiqueta">${col}</span>
-                            <span class="segmento-valor">${registro[col] || '—'}</span>
+                const valorPrincipal = registro[colPrincipal] || '—';
+                const valorSecundario = colSecundaria ? registro[colSecundaria] : null;
+
+                let filasRestantes = '';
+                for (let j = 0; j < restoColumnas.length; j++) {
+                    const col = restoColumnas[j];
+                    filasRestantes += `
+                        <div class="bg-slate-50/80 p-2 rounded-lg border border-slate-100">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">${col}</span>
+                            <span class="text-xs font-semibold text-slate-700 break-words">${resaltar(registro[col], tokens)}</span>
                         </div>`;
                 }
 
                 html += `
-                    <div class="tarjeta-segmento relative group bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm">
-                        ${filas}
-                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-end gap-2">
-                            <button onclick="abrirModalParaEditar(${originalIndex})" class="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                    <div class="bg-white rounded-2xl border border-slate-200/90 hover:border-red-300 shadow-sm hover:shadow-md transition-all p-4 flex flex-col justify-between">
+                        <div>
+                            <!-- Fila Principal: Código + Copiar -->
+                            <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
+                                <div class="min-w-0 flex-grow">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">${colPrincipal}</span>
+                                    <span class="font-mono text-base font-extrabold text-red-600 tracking-tight block truncate">${resaltar(valorPrincipal, tokens)}</span>
+                                </div>
+                                <button onclick="copiarCodigo('${valorPrincipal}', this)" title="Copiar código" class="p-2 text-slate-400 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 rounded-xl transition-all active:scale-90 flex-shrink-0 cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Fila Secundaria: Descripción/Modelo -->
+                            ${valorSecundario ? `
+                                <div class="py-2.5">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">${colSecundaria}</span>
+                                    <p class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${resaltar(valorSecundario, tokens)}</p>
+                                </div>
+                            ` : ''}
+
+                            <!-- Grid de Datos Técnicos Restantes -->
+                            <div class="grid grid-cols-2 gap-2 mt-1 mb-3">
+                                ${filasRestantes}
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="pt-2 border-t border-slate-100 flex justify-end gap-1.5">
+                            <button onclick="abrirModalParaEditar(${originalIndex})" class="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Editar
                             </button>
-                            <button onclick="eliminarRegistro(${originalIndex})" class="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            <button onclick="eliminarRegistro(${originalIndex})" class="text-xs font-semibold text-slate-400 hover:text-rose-600 hover:bg-rose-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                Eliminar
                             </button>
                         </div>
                     </div>`;
@@ -418,49 +506,85 @@
             grid.classList.remove('hidden');
         }
 
-        function habilitarInteracciones() {
-            searchInput.disabled = false;
-            addRecordBtn.disabled = false;
-            exportCsvBtn.classList.remove('hidden');
-            searchInput.placeholder = "Busca por código, descripción o modelo...";
-        }
+        // Copiado rápido al portapapeles con feedback
+        window.copiarCodigo = function(texto, btn) {
+            navigator.clipboard.writeText(texto).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`;
+                btn.classList.add('bg-emerald-50', 'border-emerald-200');
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('bg-emerald-50', 'border-emerald-200');
+                }, 1200);
+            });
+        };
 
-        function mostrarCargadorInicial() {
+        function mostrarSkeletonLoader() {
             const infoArea = document.getElementById('infoArea');
             document.getElementById('segmentsGrid').classList.add('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             
             infoArea.innerHTML = `
-                <div class="h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                <p class="text-sm font-medium text-slate-400">Sincronizando inventario...</p>`;
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+                    ${[1, 2, 3].map(() => `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+                                <div class="h-7 w-7 bg-slate-200 rounded-lg"></div>
+                            </div>
+                            <div class="h-5 bg-slate-200 rounded w-2/3"></div>
+                            <div class="grid grid-cols-2 gap-2 pt-2">
+                                <div class="h-10 bg-slate-100 rounded-lg"></div>
+                                <div class="h-10 bg-slate-100 rounded-lg"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
             infoArea.classList.remove('hidden');
+        }
+
+        function habilitarInteracciones() {
+            searchInput.disabled = false;
+            addRecordBtn.disabled = false;
+            exportCsvBtn.classList.remove('hidden');
+            searchInput.placeholder = "Escribe código, modelo o descripción...";
         }
 
         function actualizarEstadoUI(exito, mensaje) {
             const badge = document.getElementById('statusBadge');
+            const badgeMobile = document.getElementById('statusBadgeMobile');
             const text = document.getElementById('statusText');
             
-            badge.className = "h-2.5 w-2.5 rounded-full";
-            if (exito) {
-                badge.classList.add('bg-emerald-400');
-                text.className = "text-xs font-bold text-emerald-100 tracking-wide";
-                if (!localStorage.getItem(LAST_SEARCH_KEY)) {
-                    mostrarPantallaEspera();
-                }
-            } else {
-                badge.classList.add('bg-rose-500');
-                text.className = "text-xs font-bold text-rose-200 tracking-wide";
-                
-                document.getElementById('infoArea').innerHTML = `
-                    <div class="inline-flex p-3 bg-rose-50 rounded-full text-rose-500 mb-3">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                    </div>
-                    <p class="text-base font-bold text-slate-800">${mensaje}</p>
-                    <p class="text-xs text-slate-400 mt-1 text-center px-4">Verifica que 'base/datos.csv' exista o presiona refrescar.</p>`;
-            }
+            const colorClass = exito ? 'bg-emerald-400' : 'bg-rose-500';
+            badge.className = `h-2 w-2 rounded-full ${colorClass}`;
+            if (badgeMobile) badgeMobile.className = `h-2.5 w-2.5 rounded-full ${colorClass}`;
             text.textContent = mensaje;
+
+            if (exito && !localStorage.getItem(LAST_SEARCH_KEY)) {
+                mostrarPantallaEspera();
+            } else if (!exito) {
+                document.getElementById('infoArea').innerHTML = `
+                    <div class="py-12 px-4 text-center bg-white rounded-2xl border border-rose-200">
+                        <p class="text-sm font-bold text-rose-600">${mensaje}</p>
+                        <p class="text-xs text-slate-400 mt-1">Verifica la ubicación de 'base/datos.csv' o pulsa sincronizar.</p>
+                    </div>`;
+            }
+        }
+
+        function mostrarPantallaEspera() {
+            const infoArea = document.getElementById('infoArea');
+            document.getElementById('segmentsGrid').classList.add('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
+            
+            infoArea.innerHTML = `
+                <div class="py-14 text-center bg-white rounded-2xl border border-slate-200">
+                    <div class="inline-flex p-3 bg-red-50 rounded-2xl text-red-500 mb-2">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <p class="text-sm font-bold text-slate-700">Listo para Buscar</p>
+                    <p class="text-xs text-slate-400 max-w-xs mx-auto mt-0.5">Ingresa código o modelo para localizar el material.</p>
+                </div>`;
+            infoArea.classList.remove('hidden');
         }
 
         function debounce(func, delay) {
@@ -471,30 +595,14 @@
             };
         }
 
-        function mostrarPantallaEspera() {
-            const infoArea = document.getElementById('infoArea');
-            document.getElementById('segmentsGrid').classList.add('hidden');
-            document.getElementById('statusMessage').classList.add('hidden');
-            
-            infoArea.innerHTML = `
-                <div class="inline-flex p-3 bg-red-50 rounded-full text-red-500 mb-2">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-                <p class="text-base font-bold text-slate-700">Listo para Buscar</p>
-                <p class="text-xs text-slate-400 max-w-xs text-center px-4">Ingresa código o modelo. Usa '+' para agregar o '↻' para recargar.</p>`;
-            infoArea.classList.remove('hidden');
-        }
-
-        /* --- GESTIÓN CRUD Y FORMULARIOS --- */
+        /* --- GESTIÓN CRUD --- */
 
         function construirCamposFormulario(datosRegistro = {}) {
             dynamicFormFields.innerHTML = csvColumns.map(col => `
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">${col}</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">${col}</label>
                     <input type="text" name="${col}" value="${datosRegistro[col] || ''}" 
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:bg-white focus:border-red-500 focus:outline-none transition-all">
+                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:border-red-500 focus:outline-none transition-all">
                 </div>
             `).join('');
         }
@@ -538,7 +646,6 @@
                 databaseIndex.unshift(nuevoRegistro);
             }
 
-            // Guardar sin el campo interno _searchIndex para mantener el CSV limpio
             const cleanData = databaseIndex.map(({ _searchIndex, ...resto }) => resto);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData));
             cerrarModal();
@@ -566,8 +673,6 @@
 
         function exportarBaseDatosCSV() {
             if (databaseIndex.length === 0) return;
-            
-            // Limpiar campo auxiliar de búsqueda antes de exportar
             const cleanData = databaseIndex.map(({ _searchIndex, ...resto }) => resto);
             const csvOutput = Papa.unparse(cleanData);
             const blob = new Blob(["\uFEFF" + csvOutput], { type: 'text/csv;charset=utf-8;' });
@@ -582,7 +687,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // Service Worker PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
