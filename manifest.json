@@ -21,3 +21,31 @@
     }
   ]
 }
+// Referencias DOM adicionales
+const viewPdfBtn = document.getElementById('viewPdfBtn');
+const pdfModal = document.getElementById('pdfModal');
+const closePdfModalBtn = document.getElementById('closePdfModalBtn');
+const closePdfBtn = document.getElementById('closePdfBtn');
+
+// Funciones de control
+function abrirVisorPdf() {
+    pdfModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Evita scroll de fondo
+}
+
+function cerrarVisorPdf() {
+    pdfModal.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// Agregar listeners en inicializarEventos()
+viewPdfBtn.addEventListener('click', abrirVisorPdf);
+closePdfModalBtn.addEventListener('click', cerrarVisorPdf);
+closePdfBtn.addEventListener('click', cerrarVisorPdf);
+
+// Cerrar con la tecla ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !pdfModal.classList.contains('hidden')) {
+        cerrarVisorPdf();
+    }
+});
