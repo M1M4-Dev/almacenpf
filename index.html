@@ -47,19 +47,25 @@
                     <span id="statusBadgeMobile" class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse"></span>
                 </div>
             </div>
+            
+            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+                <!-- Botón de Garantía (PDF) -->
                 <button id="viewPdfBtn" class="bg-red-800/80 hover:bg-red-900 border border-red-400/40 px-3 py-1.5 rounded-xl text-xs font-semibold text-white tracking-wide transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
                     Garantía
                 </button>
-            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                <button id="exportCsvBtn" aria-label="Exportar base de datos a CSV" title="Guardar cambios a CSV" class="hidden bg-red-800/80 hover:bg-red-900 border border-red-400/40 px-3 py-1.5 rounded-xl text-xs font-semibold text-white tracking-wide transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+
+                <!-- Botón Exportar CSV -->
+                <button id="exportCsvBtn" aria-label="Exportar base de datos a CSV" title="Guardar cambios a CSV" class="hidden bg-red-800/80 hover:bg-red-900 border border-red-400/40 px-3 py-1.5 rounded-xl text-xs font-semibold text-white tracking-wide transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
                     Exportar
                 </button>
+
+                <!-- Estado del Almacén -->
                 <div class="hidden sm:flex bg-red-800/40 backdrop-blur-sm border border-red-500/30 px-3.5 py-1.5 rounded-xl items-center space-x-2">
                     <span id="statusBadge" class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
                     <span id="statusText" class="text-xs font-semibold text-red-100 tracking-wide">Iniciando...</span>
@@ -93,7 +99,7 @@
                             class="w-full pl-11 pr-10 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-500 focus:bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all font-semibold text-slate-800 placeholder-slate-400 text-sm shadow-inner" />
                         
                         <!-- Botón Limpiar (X) -->
-                        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-red-500 transition-colors" title="Borrar búsqueda (Esc)">
+                        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-red-500 transition-colors cursor-pointer" title="Borrar búsqueda (Esc)">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -151,20 +157,56 @@
         &copy; 2026 &middot; Eduardo Martínez "3DMM_58"
     </footer>
 
-    <!-- MODAL FORMULARIO -->
+    <!-- MODAL VISOR PDF GARANTÍA -->
+    <div id="pdfModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full flex flex-col h-[85vh] overflow-hidden">
+            
+            <!-- Encabezado del Modal -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <h3 class="font-bold text-sm tracking-wide">Documento de Garantía</h3>
+                </div>
+                <button id="closePdfModalBtn" class="text-slate-400 hover:text-white transition-colors text-xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Contenedor del Visor PDF con Parámetros de Contención -->
+            <div class="flex-grow w-full bg-slate-100 relative">
+                <embed id="pdfViewer" src="base/garantia.pdf#toolbar=1&navpanes=0&scrollbar=1" type="application/pdf" class="w-full h-full rounded-b-2xl" />
+            </div>
+
+            <!-- Pie de página del Modal -->
+            <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex justify-between items-center flex-shrink-0">
+                <span class="text-xs text-slate-500 font-medium hidden sm:inline">Archivo: <code class="bg-slate-200 px-1.5 py-0.5 rounded text-slate-700">base/garantia.pdf</code></span>
+                <div class="flex gap-2 ml-auto">
+                    <a href="base/garantia.pdf" target="_blank" download class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl text-xs transition-all flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Descargar
+                    </a>
+                    <button id="closePdfBtn" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm cursor-pointer">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORMULARIO REGISTRO -->
     <div id="recordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
                 <h3 id="modalTitle" class="font-bold text-sm tracking-wide">Registrar Ítem</h3>
-                <button id="closeModalBtn" class="text-slate-400 hover:text-white transition-colors text-xl font-bold">&times;</button>
+                <button id="closeModalBtn" class="text-slate-400 hover:text-white transition-colors text-xl font-bold cursor-pointer">&times;</button>
             </div>
             <form id="recordForm" class="p-6 overflow-y-auto space-y-3.5 flex-grow">
                 <input type="hidden" id="editIndex" value="-1">
                 <div id="dynamicFormFields" class="space-y-3"></div>
             </form>
             <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex justify-end gap-2.5">
-                <button type="button" id="cancelFormBtn" class="px-4 py-2 border border-slate-300 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-100 transition-all">Cancelar</button>
-                <button type="submit" form="recordForm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm">Guardar</button>
+                <button type="button" id="cancelFormBtn" class="px-4 py-2 border border-slate-300 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-100 transition-all cursor-pointer">Cancelar</button>
+                <button type="submit" form="recordForm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm cursor-pointer">Guardar</button>
             </div>
         </div>
     </div>
@@ -180,7 +222,7 @@
         const MAX_RENDER_ITEMS = 60;
         let activeQuery = '';
 
-        // DOM Elements
+        // DOM Elements Principal
         const searchInput = document.getElementById('searchInput');
         const clearSearchBtn = document.getElementById('clearSearchBtn');
         const recentSearchesContainer = document.getElementById('recentSearchesContainer');
@@ -190,7 +232,7 @@
         const addRecordBtn = document.getElementById('addRecordBtn');
         const exportCsvBtn = document.getElementById('exportCsvBtn');
 
-        // Modal Elements
+        // Modal Formulario Elements
         const recordModal = document.getElementById('recordModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const cancelFormBtn = document.getElementById('cancelFormBtn');
@@ -198,6 +240,12 @@
         const dynamicFormFields = document.getElementById('dynamicFormFields');
         const modalTitle = document.getElementById('modalTitle');
         const editIndexInput = document.getElementById('editIndex');
+
+        // Modal PDF Elements
+        const viewPdfBtn = document.getElementById('viewPdfBtn');
+        const pdfModal = document.getElementById('pdfModal');
+        const closePdfModalBtn = document.getElementById('closePdfModalBtn');
+        const closePdfBtn = document.getElementById('closePdfBtn');
 
         document.addEventListener('DOMContentLoaded', () => {
             mostrarSkeletonLoader();
@@ -233,15 +281,26 @@
                 searchInput.focus();
             });
 
-            // Atajos de teclado: "/" para buscar y "Escape" para limpiar
+            // Atajos de teclado: "/" para buscar y "Escape" para limpiar o cerrar modales
             document.addEventListener('keydown', (e) => {
                 if (e.key === '/' && document.activeElement !== searchInput) {
                     e.preventDefault();
                     searchInput.focus();
-                } else if (e.key === 'Escape' && document.activeElement === searchInput) {
-                    clearSearchBtn.click();
+                } else if (e.key === 'Escape') {
+                    if (!pdfModal.classList.contains('hidden')) {
+                        cerrarVisorPdf();
+                    } else if (!recordModal.classList.contains('hidden')) {
+                        cerrarModal();
+                    } else if (document.activeElement === searchInput) {
+                        clearSearchBtn.click();
+                    }
                 }
             });
+
+            // Eventos del Visor PDF
+            viewPdfBtn.addEventListener('click', abrirVisorPdf);
+            closePdfModalBtn.addEventListener('click', cerrarVisorPdf);
+            closePdfBtn.addEventListener('click', cerrarVisorPdf);
 
             // Sincronización
             refreshBtn.addEventListener('click', () => {
@@ -255,7 +314,7 @@
                 setTimeout(() => refreshIcon.classList.remove('rotate-effect'), 800);
             });
 
-            // Modal
+            // Modal Formulario
             addRecordBtn.addEventListener('click', abrirModalParaCrear);
             closeModalBtn.addEventListener('click', cerrarModal);
             cancelFormBtn.addEventListener('click', cerrarModal);
@@ -263,6 +322,17 @@
 
             // Exportar
             exportCsvBtn.addEventListener('click', exportarBaseDatosCSV);
+        }
+
+        // Control Visor PDF
+        function abrirVisorPdf() {
+            pdfModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarVisorPdf() {
+            pdfModal.classList.add('hidden');
+            document.body.style.overflow = '';
         }
 
         // Precalcula el string de búsqueda O(1)
@@ -396,7 +466,6 @@
             renderizarSegmentosOptimizados(resultados, tokens);
         }
 
-        // Resaltado dinámico ligero con <mark>
         function resaltar(texto, tokens) {
             if (!texto || !tokens || tokens.length === 0) return texto || '—';
             let res = String(texto);
@@ -467,7 +536,6 @@
                 html += `
                     <div class="bg-white rounded-2xl border border-slate-200/90 hover:border-red-300 shadow-sm hover:shadow-md transition-all p-4 flex flex-col justify-between">
                         <div>
-                            <!-- Fila Principal: Código + Copiar -->
                             <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
                                 <div class="min-w-0 flex-grow">
                                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">${colPrincipal}</span>
@@ -480,7 +548,6 @@
                                 </button>
                             </div>
 
-                            <!-- Fila Secundaria: Descripción/Modelo -->
                             ${valorSecundario ? `
                                 <div class="py-2.5">
                                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">${colSecundaria}</span>
@@ -488,13 +555,11 @@
                                 </div>
                             ` : ''}
 
-                            <!-- Grid de Datos Técnicos Restantes -->
                             <div class="grid grid-cols-2 gap-2 mt-1 mb-3">
                                 ${filasRestantes}
                             </div>
                         </div>
 
-                        <!-- Botones de Acción -->
                         <div class="pt-2 border-t border-slate-100 flex justify-end gap-1.5">
                             <button onclick="abrirModalParaEditar(${originalIndex})" class="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -511,7 +576,6 @@
             grid.classList.remove('hidden');
         }
 
-        // Copiado rápido al portapapeles con feedback
         window.copiarCodigo = function(texto, btn) {
             navigator.clipboard.writeText(texto).then(() => {
                 const originalHtml = btn.innerHTML;
@@ -548,6 +612,23 @@
             infoArea.classList.remove('hidden');
         }
 
+        function mostrarPantallaEspera() {
+            const infoArea = document.getElementById('infoArea');
+            document.getElementById('segmentsGrid').classList.add('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
+            infoArea.innerHTML = `
+                <div class="py-16 text-center bg-white rounded-2xl border border-slate-200 shadow-sm max-w-md mx-auto">
+                    <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-red-600">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base">Buscador de Almacén</h3>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Escribe cualquier término (código, modelo, descripción) para filtrar los registros en tiempo real.</p>
+                </div>`;
+            infoArea.classList.remove('hidden');
+        }
+
         function habilitarInteracciones() {
             searchInput.disabled = false;
             addRecordBtn.disabled = false;
@@ -569,171 +650,123 @@
                 mostrarPantallaEspera();
             } else if (!exito) {
                 document.getElementById('infoArea').innerHTML = `
-                    <div class="py-12 px-4 text-center bg-white rounded-2xl border border-rose-200">
-                        <p class="text-sm font-bold text-rose-600">${mensaje}</p>
-                        <p class="text-xs text-slate-400 mt-1">Verifica la ubicación de 'base/datos.csv' o pulsa sincronizar.</p>
+                    <div class="py-12 px-4 text-center bg-rose-50/50 rounded-2xl border border-rose-200 max-w-md mx-auto">
+                        <p class="font-bold text-rose-700 text-sm">Error de carga</p>
+                        <p class="text-xs text-rose-500 mt-1">${mensaje}</p>
                     </div>`;
             }
         }
 
-        function mostrarPantallaEspera() {
-            const infoArea = document.getElementById('infoArea');
-            document.getElementById('segmentsGrid').classList.add('hidden');
-            document.getElementById('statusMessage').classList.add('hidden');
-            
-            infoArea.innerHTML = `
-                <div class="py-14 text-center bg-white rounded-2xl border border-slate-200">
-                    <div class="inline-flex p-3 bg-red-50 rounded-2xl text-red-500 mb-2">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </div>
-                    <p class="text-sm font-bold text-slate-700">Listo para Buscar</p>
-                    <p class="text-xs text-slate-400 max-w-xs mx-auto mt-0.5">Ingresa código o modelo para localizar el material.</p>
-                </div>`;
-            infoArea.classList.remove('hidden');
-        }
-
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), delay);
-            };
-        }
-
-        /* --- GESTIÓN CRUD --- */
-
-        function construirCamposFormulario(datosRegistro = {}) {
-            dynamicFormFields.innerHTML = csvColumns.map(col => `
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">${col}</label>
-                    <input type="text" name="${col}" value="${datosRegistro[col] || ''}" 
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:bg-white focus:border-red-500 focus:outline-none transition-all">
-                </div>
-            `).join('');
-        }
-
+        // Funciones CRUD (Modal Formulario)
         function abrirModalParaCrear() {
-            modalTitle.textContent = "Registrar Nuevo Ítem";
+            modalTitle.textContent = "Nuevo Registro";
             editIndexInput.value = "-1";
-            construirCamposFormulario();
+            generarCamposFormulario();
             recordModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
-        function abrirModalParaEditar(index) {
-            modalTitle.textContent = "Editar Ítem del Inventario";
-            editIndexInput.value = index;
-            construirCamposFormulario(databaseIndex[index]);
+        window.abrirModalParaEditar = function(originalIndex) {
+            modalTitle.textContent = "Editar Registro";
+            editIndexInput.value = originalIndex;
+            const registro = databaseIndex[originalIndex];
+            generarCamposFormulario(registro);
             recordModal.classList.remove('hidden');
-        }
+            document.body.style.overflow = 'hidden';
+        };
 
         function cerrarModal() {
             recordModal.classList.add('hidden');
-            recordForm.reset();
+            document.body.style.overflow = '';
+        }
+
+        function generarCamposFormulario(registro = null) {
+            dynamicFormFields.innerHTML = csvColumns.map(col => `
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">${col}</label>
+                    <input type="text" name="${col}" value="${registro ? (registro[col] || '') : ''}" 
+                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-xs font-semibold text-slate-800" />
+                </div>
+            `).join('');
         }
 
         function guardarRegistro(e) {
             e.preventDefault();
             const formData = new FormData(recordForm);
+            const index = parseInt(editIndexInput.value, 10);
             const nuevoRegistro = {};
 
-            let searchConcat = '';
             csvColumns.forEach(col => {
-                const val = (formData.get(col) || '').trim();
-                nuevoRegistro[col] = val;
-                searchConcat += val + ' ';
+                nuevoRegistro[col] = formData.get(col) || '';
             });
+
+            let searchConcat = '';
+            for (let k in nuevoRegistro) {
+                if (k !== '_searchIndex') searchConcat += (nuevoRegistro[k] || '') + ' ';
+            }
             nuevoRegistro._searchIndex = searchConcat.toLowerCase();
 
-            const editIndex = parseInt(editIndexInput.value, 10);
-            if (editIndex >= 0) {
-                databaseIndex[editIndex] = nuevoRegistro;
+            if (index >= 0) {
+                databaseIndex[index] = nuevoRegistro;
             } else {
                 databaseIndex.unshift(nuevoRegistro);
             }
 
-            const cleanData = databaseIndex.map(({ _searchIndex, ...resto }) => resto);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData));
+            guardarEnLocalStorage();
             cerrarModal();
 
-            if (searchInput.value.trim()) {
-                ejecutarBusqueda(searchInput.value.toLowerCase().trim());
+            if (activeQuery) {
+                ejecutarBusqueda(activeQuery.toLowerCase());
             } else {
                 mostrarPantallaEspera();
             }
         }
 
-        function eliminarRegistro(index) {
-            if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
-                databaseIndex.splice(index, 1);
-                const cleanData = databaseIndex.map(({ _searchIndex, ...resto }) => resto);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData));
-                
-                if (searchInput.value.trim()) {
-                    ejecutarBusqueda(searchInput.value.toLowerCase().trim());
+        window.eliminarRegistro = function(originalIndex) {
+            if (confirm("¿Estás seguro de eliminar este registro?")) {
+                databaseIndex.splice(originalIndex, 1);
+                guardarEnLocalStorage();
+                if (activeQuery) {
+                    ejecutarBusqueda(activeQuery.toLowerCase());
                 } else {
                     mostrarPantallaEspera();
                 }
             }
+        };
+
+        function guardarEnLocalStorage() {
+            const dataToSave = databaseIndex.map(item => {
+                const copy = { ...item };
+                delete copy._searchIndex;
+                return copy;
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
         }
 
         function exportarBaseDatosCSV() {
-            if (databaseIndex.length === 0) return;
-            const cleanData = databaseIndex.map(({ _searchIndex, ...resto }) => resto);
-            const csvOutput = Papa.unparse(cleanData);
-            const blob = new Blob(["\uFEFF" + csvOutput], { type: 'text/csv;charset=utf-8;' });
+            const dataToExport = databaseIndex.map(item => {
+                const copy = { ...item };
+                delete copy._searchIndex;
+                return copy;
+            });
+            const csv = Papa.unparse(dataToExport);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            
             const link = document.createElement('a');
             link.setAttribute('href', url);
-            link.setAttribute('download', `inventario_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute('download', `datos_almacen_${new Date().toISOString().slice(0, 10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(url);
         }
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA lista:', reg.scope))
-                    .catch(err => console.error('Error PWA:', err));
-            });
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
         }
     </script>
 </body>
 </html>
-<!-- MODAL VISOR PDF -->
-<div id="pdfModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-4xl w-full flex flex-col h-[85vh] overflow-hidden">
-        
-        <!-- Encabezado del Modal -->
-        <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
-            <div class="flex items-center space-x-2">
-                <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <h3 class="font-bold text-sm tracking-wide">Documento de Garantía</h3>
-            </div>
-            <button id="closePdfModalBtn" class="text-slate-400 hover:text-white transition-colors text-xl font-bold cursor-pointer">&times;</button>
-        </div>
-
-        <!-- Contenedor del Visor PDF -->
-        <div class="flex-grow w-full bg-slate-100 relative">
-            <embed id="pdfViewer" src="base/garantia.pdf#toolbar=1&navpanes=0&scrollbar=1" type="application/pdf" class="w-full h-full rounded-b-2xl" />
-        </div>
-
-        <!-- Pie de página con opciones adicionales -->
-        <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex justify-between items-center flex-shrink-0">
-            <span class="text-xs text-slate-500 font-medium">Archivo: <code class="bg-slate-200 px-1.5 py-0.5 rounded text-slate-700">base/garantia.pdf</code></span>
-            <div class="flex gap-2">
-                <a href="base/garantia.pdf" target="_blank" download class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl text-xs transition-all flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Descargar
-                </a>
-                <button id="closePdfBtn" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-all shadow-sm cursor-pointer">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
