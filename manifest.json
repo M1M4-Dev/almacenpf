@@ -20,7 +20,6 @@
       "type": "image/png"
     }
   ]
-}
 // Referencias DOM adicionales
 const viewPdfBtn = document.getElementById('viewPdfBtn');
 const pdfModal = document.getElementById('pdfModal');
@@ -49,3 +48,4 @@ document.addEventListener('keydown', (e) => {
         cerrarVisorPdf();
     }
 });
+}
